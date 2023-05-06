@@ -1,25 +1,56 @@
-#include <SFML/Graphics.hpp>
+#include "imgui-SFML.h"
+#include "imgui.h"
+
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
 
 int main()
 {
-    sf::RenderWindow window{sf::VideoMode(200, 200), "CMake SFML Project"};
-    // sf::RenderWindow window{{1080u, 640u}, "CMake SFML Project"};
-    window.setFramerateLimit(144);
-    sf::CircleShape circle{100.0f};
-    circle.setFillColor(sf::Color::Green);
+    sf::RenderWindow window(sf::VideoMode(640, 480), "imgui+sfml");
+    window.setFramerateLimit(60);
+    ImGui::SFML::Init(window);
 
+    sf::CircleShape shape(100.f);
+    shape.setFillColor(sf::Color::Green);
+
+    sf::Clock deltaClock;
     while (window.isOpen())
     {
-        for (auto event = sf::Event{}; window.pollEvent(event);)
+        sf::Event event;
+        while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            ImGui::SFML::ProcessEvent(window, event);
+
+            if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
+            if (event.type == sf::Event::KeyPressed)
+            {
+                if (event.key.code == sf::Keyboard::Escape)
+                {
+                    window.close();
+                }
+            }
         }
 
+        ImGui::SFML::Update(window, deltaClock.restart());
+
+        // ImGui::ShowDemoWindow();
+        {
+            ImGui::Begin("Hello, world!");
+            ImGui::Button("Look at this pretty button");
+            ImGui::End();
+        }
         window.clear();
-        window.draw(circle);
+        window.draw(shape);
+        ImGui::SFML::Render(window);
         window.display();
     }
+
+    ImGui::SFML::Shutdown();
+
+    return 0;
 }
